@@ -31,76 +31,14 @@
 
     let currentAltitude = 600; let dataSource;
     
-    function generateSatelliteCzml(altitude) {
-      const now = Cesium.JulianDate.now();
-      // console.log("now", now);
-      const start = now;
-      const stop = Cesium.JulianDate.addHours(now, 2, new Cesium.JulianDate());
-
+    function calculateSatelliteOrbitalTrajectory(altitude) {
       const earthRadius = 6371;
       const semiMajorAxis = earthRadius + altitude;
       const semiMajorAxisMeters = semiMajorAxis * 1000;
-      
       const eccentricity = 0;
       const inclination = 51.6; 
       const longitudeOfAscendingNode = 0;
       const argumentOfPeriapsis = 0;
-      
-      // Create the CZML document
-      const czml = [
-        {
-          id: "document",
-          name: "CZML Satellite Orbit",
-          version: "1.0",
-          clock: {
-            interval: `${Cesium.JulianDate.toIso8601(start)}/${Cesium.JulianDate.toIso8601(stop)}`,
-            currentTime: Cesium.JulianDate.toIso8601(start),
-            multiplier: 1
-          }
-        },
-        {
-          id: "Satellite",
-          name: `ISDA-K89`,
-          availability: `${Cesium.JulianDate.toIso8601(start)}/${Cesium.JulianDate.toIso8601(stop)}`,
-          description: `Initial testing satellite (${altitude}km altitude orbit)`,
-            billboard:{
-                eyeOffset:{
-                    "cartesian":[
-                    0,0,0
-                    ]
-                },
-                horizontalOrigin:"CENTER",
-                image:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADJSURBVDhPnZHRDcMgEEMZjVEYpaNklIzSEfLfD4qNnXAJSFWfhO7w2Zc0Tf9QG2rXrEzSUeZLOGm47WoH95x3Hl3jEgilvDgsOQUTqsNl68ezEwn1vae6lceSEEYvvWNT/Rxc4CXQNGadho1NXoJ+9iaqc2xi2xbt23PJCDIB6TQjOC6Bho/sDy3fBQT8PrVhibU7yBFcEPaRxOoeTwbwByCOYf9VGp1BYI1BA+EeHhmfzKbBoJEQwn1yzUZtyspIQUha85MpkNIXB7GizqDEECsAAAAASUVORK5CYII=",
-                pixelOffset:{
-                    cartesian2:[
-                    0,0
-                    ]
-                },
-                scale:2,
-                show:true,
-                verticalOrigi:"CENTER"
-            },
-          path: {
-            show: true,
-            width: 2,
-            material: {
-              solidColor: {
-                color: {
-                  rgba: [255, 255, 0, 255]
-                }
-              }
-            },
-            resolution: 120
-          },
-          position: {
-            interpolationAlgorithm: "LAGRANGE",
-            interpolationDegree: 5,
-            referenceFrame: "INERTIAL",
-            epoch: Cesium.JulianDate.toIso8601(start),
-            cartesian: []
-          }
-        }
-      ];
 
       // Position Samples to interpolate
       // Orbital period in seconds
@@ -154,15 +92,79 @@
         cartesianValues.push(timeSeconds, xFinal, yFinal, z);
       }
       
-      // Add the cartesian values to the CZML
-      czml[1].position.cartesian = cartesianValues;
+      return cartesianValues;
+    }
+
+
+    function generateSatelliteCzml() {
+      const now = Cesium.JulianDate.now();
+      // console.log("now", now);
+      const start = now;
+      const stop = Cesium.JulianDate.addHours(now, 2, new Cesium.JulianDate());
       
+      // Create the CZML document
+      const czml = [
+        {
+          id: "document",
+          name: "CZML Satellite Orbit",
+          version: "1.0",
+          clock: {
+            interval: `${Cesium.JulianDate.toIso8601(start)}/${Cesium.JulianDate.toIso8601(stop)}`,
+            currentTime: Cesium.JulianDate.toIso8601(start),
+            multiplier: 1
+          }
+        },
+        {
+          id: "Satellite",
+          name: `ISDA-K89`,
+          availability: `${Cesium.JulianDate.toIso8601(start)}/${Cesium.JulianDate.toIso8601(stop)}`,
+          description: `Initial testing satellite (${currentAltitude}km altitude orbit)`,
+            billboard:{
+                eyeOffset:{
+                    "cartesian":[
+                    0,0,0
+                    ]
+                },
+                horizontalOrigin:"CENTER",
+                image:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADJSURBVDhPnZHRDcMgEEMZjVEYpaNklIzSEfLfD4qNnXAJSFWfhO7w2Zc0Tf9QG2rXrEzSUeZLOGm47WoH95x3Hl3jEgilvDgsOQUTqsNl68ezEwn1vae6lceSEEYvvWNT/Rxc4CXQNGadho1NXoJ+9iaqc2xi2xbt23PJCDIB6TQjOC6Bho/sDy3fBQT8PrVhibU7yBFcEPaRxOoeTwbwByCOYf9VGp1BYI1BA+EeHhmfzKbBoJEQwn1yzUZtyspIQUha85MpkNIXB7GizqDEECsAAAAASUVORK5CYII=",
+                pixelOffset:{
+                    cartesian2:[
+                    0,0
+                    ]
+                },
+                scale:2,
+                show:true,
+                verticalOrigi:"CENTER"
+            },
+          path: {
+            show: true,
+            width: 2,
+            material: {
+              solidColor: {
+                color: {
+                  rgba: [255, 255, 0, 255]
+                }
+              }
+            },
+            resolution: 120
+          },
+          position: {
+            interpolationAlgorithm: "LAGRANGE",
+            interpolationDegree: 5,
+            referenceFrame: "INERTIAL",
+            epoch: Cesium.JulianDate.toIso8601(start),
+            cartesian: []
+          }
+        }
+      ];
+      
+      czml[1].position.cartesian = calculateSatelliteOrbitalTrajectory(currentAltitude);
       return czml;
     }
 
     function loadSatellite() {
       // Generate CZML for initial altitude
-      const czml = generateSatelliteCzml(currentAltitude);
+      const czml = generateSatelliteCzml();
       
       // Load the CZML document
       dataSource = new Cesium.CzmlDataSource();
